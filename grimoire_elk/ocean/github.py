@@ -52,6 +52,10 @@ class GitHubOcean(ElasticOcean):
         params = []
 
         dparam = cls.get_arthur_params_from_url(url)
+        # Automatic tag creation to be used with arthur
+        tag = url + "_" + cls.get_connector_name()
+        params.append('--tag')  # tag param
+        params.append(tag)
         params.append(dparam['owner'])
         params.append(dparam['repository'])
         return params
