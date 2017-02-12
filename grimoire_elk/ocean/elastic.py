@@ -93,10 +93,11 @@ class ElasticOcean(object):
 
         return last_update
 
-    def get_connector_name(self):
+    @classmethod
+    def get_connector_name(cls):
         """ Find the name for the current connector """
         from ..utils import get_connector_name
-        return get_connector_name(type(self))
+        return get_connector_name(cls)
 
     @classmethod
     def get_p2o_params_from_url(cls, url):
@@ -106,7 +107,15 @@ class ElasticOcean(object):
     @classmethod
     def get_perceval_params_from_url(cls, url):
         """ Get the perceval params given a URL for the data source """
-        return [url]
+        # tag is the url (origin) and the backend, to support origins with different
+        # data sources, like github with git and github
+
+        params = []
+        tag = url + "_" + cls.get_connector_name()
+        params.append('--tag')  # tag param
+        params.append(tag)
+        params.append(url)  # origin positional param
+        return params
 
     @classmethod
     def get_arthur_params_from_url(cls, url):
