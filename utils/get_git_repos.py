@@ -23,7 +23,9 @@
 #   Alvaro del Castillo San Felix <acs@bitergia.com>
 #
 import argparse
+import json
 import logging
+import sys
 
 import requests
 
@@ -34,6 +36,7 @@ from dateutil import parser
 from grimoire_elk.utils import config_logging
 
 GITHUB_API_URL = "https://api.github.com"
+GITHUB_URL = "https://github.com"
 NREPOS = 0  # all
 
 
@@ -43,12 +46,20 @@ def get_params():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-g', '--debug', dest='debug', action='store_true')
+    parser.add_argument('-m', '--mordred', dest='mordred', action='store_true',
+                        help="Generate mordred projects file")
     parser.add_argument('-t', '--token', dest='token', help="GitHub token")
     parser.add_argument('-o', '--owner', dest='owner', help='GitHub owner (user or org) to be analyzed')
     parser.add_argument('-n', '--nrepos', dest='nrepos', type=int, default=NREPOS,
                         help='Number of GitHub repositories from the Organization to be analyzed (default:10)')
 
-    return  parser.parse_args()
+    params = parser.parse_args()
+
+    if not params.owner:
+        print("owner param is needed")
+        sys.exit(1)
+
+    return params
 
 def get_payload():
     # 100 max in repos
@@ -59,7 +70,9 @@ def get_payload():
     return payload
 
 def get_headers(token):
-    headers = {'Authorization': 'token ' + token}
+    headers = {}
+    if token:
+        headers = {'Authorization': 'token ' + token}
     return headers
 
 def get_owner_repos_url(owner, token):
@@ -132,9 +145,44 @@ def get_repositories(owner, token, nrepos):
         logging.debug("%s %i %s", repo['updated_at'], repo['size'], repo['name'])
     return nrepos_sorted
 
+def get_mordred_projects(owner, repos):
+    # Sample format
+    # {
+    #     "grimoire": {
+    #         "git": [
+    #             "https://github.com/grimoirelab/perceval",
+    #             "https://github.com/grimoirelab/arthur",
+    #             "https://github.com/grimoirelab/grimoireelk"
+    #         ],
+    #         "github": [
+    #             "https://github.com/grimoirelab/perceval"
+    #         ]
+    #     }
+    # }
+
+    owner_url = GITHUB_URL+"/"+owner+"/"
+    projects = {
+        owner:
+            {
+                "git": [],
+                "github": []
+            }
+    }
+    for repo in repos:
+        projects[owner]["git"].append(owner_url + repo['name'])
+        projects[owner]["github"].append(owner_url + repo['name'])
+    return projects
+
 if __name__ == '__main__':
     args = get_params()
     config_logging(args.debug)
     repos = get_repositories(args.owner, args.token, args.nrepos)
-    for repo in repos:
-        print(repo['name'])
+    if not args.mordred:
+        for repo in repos:
+            print(repo['name'])
+    else:
+        prj_file = args.owner + "-projects.json"
+        logging.info("Generating mordred projects file in %s", prj_file)
+        projects = get_mordred_projects(args.owner, repos)
+        with open (prj_file, "w") as f:
+            json.dump(projects, f, indent=4)
