@@ -33,6 +33,21 @@ class StackExchangeOcean(ElasticOcean):
         item["ocean-unique-id"] = str(item["data"]["question_id"])+"_"+item['origin']
 
     @classmethod
+    def get_arthur_params_from_url(cls, url):
+        """ Get the arthur params given a URL for the data source """
+        params = {}
+
+        tokens = url.replace('https://','').replace('http://','').split('/')
+        tag = tokens[-1]
+        site = tokens[0]
+
+        # params.append('--owner')
+        params['site'] = site
+        # params.append('--repository')
+        params['tagged'] = tag
+        return params
+
+    @classmethod
     def get_perceval_params_from_url(cls, url):
         params = []
 

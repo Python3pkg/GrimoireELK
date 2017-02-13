@@ -120,7 +120,7 @@ class ElasticOcean(object):
     @classmethod
     def get_arthur_params_from_url(cls, url):
         """ Get the arthur params given a URL for the data source """
-        return {"uri": url}
+        return {"url": url}
 
     def drop_item(self, item):
         """ Drop items not to be inserted in Elastic """

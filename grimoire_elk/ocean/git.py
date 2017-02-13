@@ -32,3 +32,8 @@ class GitOcean(ElasticOcean):
 
     def _fix_item(self, item):
         item["ocean-unique-id"] = item["data"]["commit"]+"_"+item['origin']
+
+    @classmethod
+    def get_arthur_params_from_url(cls, url):
+        """ Get the arthur params given a URL for the data source """
+        return {"uri": url}
