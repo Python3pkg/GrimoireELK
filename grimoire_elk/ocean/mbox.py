@@ -36,8 +36,21 @@ class MBoxOcean(ElasticOcean):
         if "Message-ID" in item["data"] and item["data"]["Message-ID"]:
             item["ocean-unique-id"] = item["data"]["Message-ID"]+"_"+item['origin']
         else:
-            logging.warning("No Message-ID in %s %s" % (item["data"]["Subject"], item['origin']))
+            logging.warning("No Message-ID in %s %s", item["data"]["Subject"], item['origin'])
             item["ocean-unique-id"] = "NONE_"+item['origin']
+
+    @classmethod
+    def get_arthur_params_from_url(cls, url):
+        """ Get the arthur params given a URL for the data source """
+        data = url.split()
+        if len(data) > 1:
+            # mbox params
+            params = {"uri": data[0], "dirpath": data[1]}
+        else:
+            # pipermail
+            params = {"url": url}
+
+        return params
 
     @classmethod
     def get_perceval_params_from_url(cls, url):

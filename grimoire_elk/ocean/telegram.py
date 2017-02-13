@@ -26,5 +26,12 @@ from .elastic import ElasticOcean
 class TelegramOcean(ElasticOcean):
     """Telegram Ocean feeder"""
 
+    @classmethod
+    def get_arthur_params_from_url(cls, url):
+        """ Get the arthur params given a URL for the data source """
+        params = {"bot": url}
+
+        return params
+
     def _fix_item(self, item):
         item["ocean-unique-id"] = item["uuid"]

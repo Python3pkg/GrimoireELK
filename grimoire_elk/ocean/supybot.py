@@ -32,6 +32,15 @@ class SupybotOcean(ElasticOcean):
         item["ocean-unique-id"] = item["uuid"]
 
     @classmethod
+    def get_arthur_params_from_url(cls, url):
+        """ Get the arthur params given a URL for the data source """
+        data = url.split()
+        # mbox params
+        params = {"uri": data[0], "dirpath": data[1]}
+
+        return params
+
+    @classmethod
     def get_perceval_params_from_url(cls, url):
         # In the url the uri and the data dir are included
         params = url.split()
